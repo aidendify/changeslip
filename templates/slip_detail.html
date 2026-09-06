@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ slip.customer_name }} · ChangeSlip{% endblock %}
+{% block content %}
+<p class="crumb no-print"><a href="{{ url_for('index') }}">Slips</a> · #{{ slip.id }}</p>
+
+<section class="card">
+  <div class="seq-head">
+    <div>
+      <h1>{{ slip.summary }}</h1>
+      <p class="lede">{{ slip.customer_name }}{% if slip.job_ref %} · Job {{ slip.job_ref }}{% endif %}</p>
+    </div>
+    <span class="badge badge-{{ slip.status }}">{{ slip.status }}</span>
+  </div>
+
+  <dl class="facts">
+    <div>
+      <dt>Amount</dt>
+      <dd class="amount-big">{{ format_money(slip.amount_cents, slip.currency) }}</dd>
+    </div>
+    <div>
+      <dt>Created (UTC)</dt>
+      <dd>{{ slip.created_at }}</dd>
+    </div>
+    <div>
+      <dt>Accepted (UTC)</dt>
+      <dd>{{ slip.accepted_at or "—" }}</dd>
+    </div>
+  </dl>
+
+  {% if slip.details %}
+  <h2>Details</h2>
+  <p class="body">{{ slip.details }}</p>
+  {% endif %}
+
+  <p><strong>Public link</strong><br><code>{{ public_url }}</code></p>
+
+  <div class="btn-row no-print">
+    <button type="button" class="btn" onclick="copyText({{ public_url|tojson }}, this)">Copy link</button>
+    <button type="button" class="btn btn-quiet" onclick="copyText({{ sms_text|tojson }}, this)">Copy SMS/text blurb</button>
+    <button type="button" class="btn btn-quiet" onclick="copyText({{ email_text|tojson }}, this)">Copy email</button>
+    {% if smtp_configured and slip.customer_email %}
+    <form method="post" action="{{ url_for('email_link', slip_id=slip.id) }}" style="display:inline;">
+      <button type="submit" class="btn btn-quiet">Email link</button>
+    </form>
+    {% endif %}
+    {% if slip.status == 'pending' %}
+    <form method="post" action="{{ url_for('void_slip', slip_id=slip.id) }}" style="display:inline;"
+          onsubmit="return confirm('Void this pending change slip?');">
+      <button type="submit" class="btn btn-danger">Void</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if slip.customer_email or slip.customer_phone %}
+  <p class="hint">
+    {% if slip.customer_email %}Email: {{ slip.customer_email }}{% endif %}
+    {% if slip.customer_email and slip.customer_phone %} · {% endif %}
+    {% if slip.customer_phone %}Phone: {{ slip.customer_phone }}{% endif %}
+  </p>
+  {% endif %}
+</section>
+
+<section class="card no-print copy-fields">
+  <h2>SMS / text blurb</h2>
+  <textarea readonly>{{ sms_text }}</textarea>
+  <h2>Email copy</h2>
+  <p class="hint">Subject: {{ email_subject }}</p>
+  <textarea readonly>{{ email_text }}</textarea>
+</section>
+
+<section class="card">
+  <h2>Audit timeline</h2>
+  <ul class="timeline">
+    {% for e in events %}
+    <li>
+      <span class="kind">{{ e.kind }}</span>
+      <span class="at">{{ e.at }} UTC</span>
+    </li>
+    {% else %}
+    <li class="empty">No events yet.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

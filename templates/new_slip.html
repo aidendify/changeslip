@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}New slip · ChangeSlip{% endblock %}
+{% block content %}
+<p class="crumb"><a href="{{ url_for('index') }}">Slips</a> · New</p>
+<section class="card">
+  <h1>New change slip</h1>
+  <p class="lede">Type what the customer wants, price it, then share the magic link.</p>
+  <form method="post" action="{{ url_for('new_slip') }}" class="stack">
+    <label>Customer name *
+      <input name="customer_name" required value="{{ form.customer_name if form else '' }}">
+    </label>
+    <label>Customer email
+      <input type="email" name="customer_email" value="{{ form.customer_email if form else '' }}">
+    </label>
+    <label>Customer phone
+      <input name="customer_phone" value="{{ form.customer_phone if form else '' }}">
+    </label>
+    <label>Job / WO ref
+      <input name="job_ref" value="{{ form.job_ref if form else '' }}">
+    </label>
+    <label>Summary * <span class="hint">(plain language "customer wants X")</span>
+      <input name="summary" required value="{{ form.summary if form else '' }}">
+    </label>
+    <label>Details
+      <textarea name="details" rows="4">{{ form.details if form else '' }}</textarea>
+    </label>
+    <label>Amount (cents) *
+      <input name="amount_cents" inputmode="numeric" required placeholder="25000" value="{{ form.amount_cents if form else '' }}">
+    </label>
+    <label>Currency
+      <input name="currency" value="{{ form.currency if form else default_currency }}">
+    </label>
+    <button type="submit" class="btn">Create slip</button>
+  </form>
+</section>
+{% endblock %}

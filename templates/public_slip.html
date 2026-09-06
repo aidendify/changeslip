@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Change order · {{ business_name }}{% endblock %}
+{% block content %}
+<section class="card public-card">
+  <p class="hint">{{ business_name }}</p>
+  <h1>Change order</h1>
+  <p class="lede">For {{ slip.customer_name }}{% if slip.job_ref %} · Job {{ slip.job_ref }}{% endif %}</p>
+
+  <h2>{{ slip.summary }}</h2>
+  {% if slip.details %}
+  <p class="body">{{ slip.details }}</p>
+  {% endif %}
+
+  <p class="amount-big">{{ format_money(slip.amount_cents, slip.currency) }}</p>
+  <p class="hint">Created {{ slip.created_at }} UTC</p>
+
+  {% if slip.status == 'pending' %}
+  <div class="btn-row">
+    <form method="post" action="{{ url_for('accept_slip', token=slip.token) }}" class="stack" style="flex:1;min-width:12rem;">
+      {% if typed_name_required %}
+      <label>Type your full name to Accept
+        <input name="typed_name" required placeholder="{{ slip.customer_name }}" autocomplete="name">
+      </label>
+      {% endif %}
+      <button type="submit" class="btn">Accept</button>
+    </form>
+    <form method="post" action="{{ url_for('decline_slip', token=slip.token) }}">
+      <button type="submit" class="btn btn-quiet">Decline</button>
+    </form>
+  </div>
+  {% elif slip.status == 'accepted' %}
+  <p class="flash flash-ok">Accepted {{ slip.accepted_at }} UTC</p>
+  <p>Accepted by customer via magic link.</p>
+  <p><a href="{{ url_for('receipt', token=slip.token) }}">View printable receipt</a></p>
+  {% elif slip.status == 'declined' %}
+  <p class="flash flash-error">Declined {{ slip.declined_at }} UTC</p>
+  <p>This change order was declined.</p>
+  {% elif slip.status == 'void' %}
+  <p class="flash flash-error">This change order was voided by the business.</p>
+  {% endif %}
+</section>
+{% endblock %}

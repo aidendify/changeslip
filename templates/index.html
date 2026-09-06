@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Slips · ChangeSlip{% endblock %}
+{% block content %}
+<div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;">
+  <div>
+    <h1>Change slips</h1>
+    <p class="lede">Newest first. Share the magic link before work continues.</p>
+  </div>
+  <a class="btn" href="{{ url_for('new_slip') }}">New slip</a>
+</div>
+
+{% if not slips %}
+<section class="card">
+  <p class="empty">No change slips yet. Create one when a customer asks for an extra mid-job.</p>
+</section>
+{% else %}
+<section class="card table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Summary</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Accepted</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in slips %}
+      <tr>
+        <td><a href="{{ url_for('slip_detail', slip_id=s.id) }}">{{ s.customer_name }}</a></td>
+        <td>{{ s.summary }}</td>
+        <td>{{ format_money(s.amount_cents, s.currency) }}</td>
+        <td><span class="badge badge-{{ s.status }}">{{ s.status }}</span></td>
+        <td>{{ s.created_at }}</td>
+        <td>{{ s.accepted_at or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

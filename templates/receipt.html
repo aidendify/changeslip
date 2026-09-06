@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Receipt · ChangeSlip{% endblock %}
+{% block content %}
+<section class="card public-card">
+  {% if pending_only %}
+  <h1>Receipt not available</h1>
+  {% if slip.status == 'pending' %}
+  <p class="lede">This change order is still pending Accept. A printable receipt appears after the customer accepts.</p>
+  {% else %}
+  <p class="lede">No receipt for status {{ slip.status }}.</p>
+  {% endif %}
+  {% else %}
+  <p class="hint">{{ business_name }}</p>
+  <h1>Change order receipt</h1>
+  <dl class="facts">
+    <div>
+      <dt>Customer</dt>
+      <dd>{{ slip.customer_name }}</dd>
+    </div>
+    <div>
+      <dt>Amount</dt>
+      <dd class="amount-big">{{ format_money(slip.amount_cents, slip.currency) }}</dd>
+    </div>
+    <div>
+      <dt>Accepted (UTC)</dt>
+      <dd>{{ slip.accepted_at }}</dd>
+    </div>
+  </dl>
+  <h2>{{ slip.summary }}</h2>
+  {% if slip.details %}<p class="body">{{ slip.details }}</p>{% endif %}
+  {% if slip.job_ref %}<p class="hint">Job / WO: {{ slip.job_ref }}</p>{% endif %}
+  <p class="hint">Ref …{{ token_suffix }}</p>
+  <p class="hint no-print"><button type="button" class="btn btn-quiet" onclick="window.print()">Print</button></p>
+  {% endif %}
+</section>
+{% endblock %}
